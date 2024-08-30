@@ -17,7 +17,7 @@ namespace BiddingService.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PlaceBid([FromBody] PlaceBidCommand.Command command)
+        public async Task<IActionResult> PlaceBid([FromBody] PlaceBidCommand.PlaceBid command)
         {
             var bidId = await _mediator.Send(command);
             return Ok(new { BidId = bidId });

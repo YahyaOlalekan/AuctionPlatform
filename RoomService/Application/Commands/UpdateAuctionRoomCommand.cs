@@ -7,9 +7,9 @@ namespace RoomService.Application.Commands
 {
     public class UpdateAuctionRoomCommand
     {
-        public record Command(Guid Id, string Name, DateTime StartTime, DateTime EndTime) : IRequest<Unit>;
+        public record UpdateAuctionRoom(Guid Id, string Name, DateTime StartTime, DateTime EndTime) : IRequest<Unit>;
 
-        public class CommandHandler : IRequestHandler<Command, Unit>
+        public class CommandHandler : IRequestHandler<UpdateAuctionRoom, Unit>
         {
             private readonly IAuctionRoomRepository _repository;
             private readonly IUnitOfWork _unitOfWork;
@@ -20,7 +20,7 @@ namespace RoomService.Application.Commands
                 _unitOfWork = unitOfWork;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(UpdateAuctionRoom request, CancellationToken cancellationToken)
             {
                 var auctionRoom = await _repository.GetByIdAsync(request.Id);
                 if (auctionRoom == null)
@@ -34,7 +34,7 @@ namespace RoomService.Application.Commands
             }
         }
 
-        public class CommandValidator : AbstractValidator<Command>
+        public class CommandValidator : AbstractValidator<UpdateAuctionRoom>
         {
             public CommandValidator()
             {

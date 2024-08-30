@@ -8,9 +8,9 @@ namespace RoomService.Application.Commands
 {
     public class CreateAuctionRoomCommand
     {
-        public record Command(string Name, DateTime StartTime, DateTime EndTime) : IRequest<Guid>;
+        public record CreateAuctionRoom(string Name, DateTime StartTime, DateTime EndTime) : IRequest<Guid>;
 
-        public class CommandHandler : IRequestHandler<Command, Guid>
+        public class CommandHandler : IRequestHandler<CreateAuctionRoom, Guid>
         {
             private readonly IAuctionRoomRepository _repository;
             private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +21,7 @@ namespace RoomService.Application.Commands
                 _unitOfWork = unitOfWork;
             }
 
-            public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Guid> Handle(CreateAuctionRoom request, CancellationToken cancellationToken)
             {
                 var auctionRoom = new AuctionRoom(request.Name, request.StartTime, request.EndTime);
                 await _repository.AddAsync(auctionRoom);
@@ -31,7 +31,7 @@ namespace RoomService.Application.Commands
         }
 
 
-        public class CommandValidator : AbstractValidator<Command>
+        public class CommandValidator : AbstractValidator<CreateAuctionRoom>
         {
             public CommandValidator()
             {

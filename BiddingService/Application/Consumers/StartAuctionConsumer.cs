@@ -1,22 +1,42 @@
 ﻿namespace BiddingService.Application.Consumers
 {
+    using BiddingService.Domain.Entities;
+    using BiddingService.Infrastructure.Repositories;
     using MassTransit;
-    //using Shared.Events;
+    using Shared.Events.Shared.Events;
 
-    //public class StartAuctionConsumer : IConsumer<StartAuctionEvent>
-    //{
-    //    public async Task Consume(ConsumeContext<StartAuctionEvent> context)
-    //    {
-    //        // Logic to handle the start of an auction
-    //        var auctionEvent = context.Message;
+    public class StartAuctionConsumer : IConsumer<StartAuctionEvent>
+    {
+        private readonly IBidRepository _bidRepository; 
+        private readonly ILogger<StartAuctionConsumer> _logger;
 
-    //        Console.WriteLine($"Auction Started: {auctionEvent.AuctionId}");
+        public StartAuctionConsumer(IBidRepository bidRepository, ILogger<StartAuctionConsumer> logger)
+        {
+            _bidRepository = bidRepository;
+            _logger = logger;
+        }
 
-    //        // Further logic, such as initializing bids for the auction
-    //        // ...
+        public async Task Consume(ConsumeContext<StartAuctionEvent> context)
+        {
+            var auctionEvent = context.Message;
 
-    //        await Task.CompletedTask;
-    //    }
-    //}
+            _logger.LogInformation($"Auction Started: {auctionEvent.AuctionRoomId}");
+
+            // Initialize bids for the auction
+                  var initialBid = new Bid(
+                   auctionRoomId: auctionEvent.AuctionRoomId,
+                   userId: Guid.Empty,
+                   amount: 0);
+              
+
+            await _bidRepository.AddAsync(initialBid);
+
+            _logger.LogInformation($"Initial bid created for Auction: {auctionEvent.AuctionRoomId}");
+
+            await Task.CompletedTask;
+        }
+    }
+
+
 
 }

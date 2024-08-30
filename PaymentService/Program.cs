@@ -1,4 +1,5 @@
 using FluentValidation;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using PaymentService.Application.Commands;
 using PaymentService.Application.UnitOfWork;
@@ -29,15 +30,23 @@ builder.Services.AddDbContext<PaymentContext>(options =>
            options.UseSqlServer(builder.Configuration.GetConnectionString("Payments")));
 
 
-// RabbitMQ setup
-//var factory = new ConnectionFactory() { HostName = configuration["RabbitMq:HostName"] };
-//var connection = factory.CreateConnection();
-//services.AddSingleton(connection);
-//services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
+builder.Services.AddMassTransit(x =>
+{
+   // x.AddConsumersFromNamespaceContaining<NewHighestBidConsumer>();
 
-//// Register the RabbitMQ Event Publisher
-//services.AddSingleton<IEventPublisher>(provider =>
-//    new RabbitMqEventPublisher("localhost", "AuctionEventsQueue"));
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("bids", false));
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+        {
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 
 var app = builder.Build();

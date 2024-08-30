@@ -3,6 +3,7 @@ using InvoiceService.Application.Commands;
 using InvoiceService.Application.UnitOfWork;
 using InvoiceService.Infrastructure.Data;
 using InvoiceService.Infrastructure.Repositories;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,17 +29,43 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddDbContext<InvoiceContext>(options =>
            options.UseSqlServer(builder.Configuration.GetConnectionString("Invoice")));
 
+builder.Services.AddMassTransit(x =>
+{
+   // x.AddConsumersFromNamespaceContaining<StartAuctionConsumer>();
 
-// RabbitMQ setup
-//var factory = new ConnectionFactory() { HostName = configuration["RabbitMq:HostName"] };
-//var connection = factory.CreateConnection();
-//services.AddSingleton(connection);
-//services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("bids", false));
 
-//// Register the RabbitMQ Event Publisher
-//services.AddSingleton<IEventPublisher>(provider =>
-//    new RabbitMqEventPublisher("localhost", "AuctionEventsQueue"));
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+        {
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+        });
 
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+//builder.Services.AddMassTransit(x =>
+//{
+//    //x.AddConsumer<StartAuctionConsumer>();
+
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        cfg.Host("rabbitmq", h =>
+//        {
+//            h.Username("guest");
+//            h.Password("guest");
+//        });
+
+//        // Configure the receive endpoint and associate it with the consumer
+//        cfg.ReceiveEndpoint("start-auction-queue", e =>
+//        {
+//           // e.ConfigureConsumer<StartAuctionConsumer>(context);
+//        });
+//    });
+//});
 
 var app = builder.Build();
 

@@ -1,5 +1,5 @@
 using BiddingService.Application.Commands;
-using BiddingService.Application.Services.Events;
+using BiddingService.Application.Consumers;
 using BiddingService.Application.UnitOfWork;
 using BiddingService.Infrastructure.Data;
 using BiddingService.Infrastructure.Repositories;
@@ -19,13 +19,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<PlaceBidCommand>());
 
 builder.Services.AddValidatorsFromAssemblyContaining<PlaceBidCommand.CommandValidator>();
-//builder.Services.AddValidatorsFromAssemblyContaining<UpdateAuctionRoomCommand.CommandValidator>();
-
-//builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddScoped<IBidRepository, BidRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddSingleton<BidEventPublisher>();
 
 builder.Services.AddDbContext<BiddingContext>(options =>
            options.UseSqlServer(builder.Configuration.GetConnectionString("BidsDb")));
@@ -33,40 +29,44 @@ builder.Services.AddDbContext<BiddingContext>(options =>
 
 builder.Services.AddMassTransit(x =>
 {
-    // Register consumers here
-   // x.AddConsumer<AuctionCreatedConsumer>();
+    x.AddConsumersFromNamespaceContaining<StartAuctionConsumer>();
+
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("bids", false));
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq", h =>
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
         {
-            h.Username("user");  // Replace with your RabbitMQ username
-            h.Password("password");  // Replace with your RabbitMQ password
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
         });
 
-        // Configure the receive endpoint and associate it with the consumer
-        cfg.ReceiveEndpoint("auction-created-queue", e =>
-        {
-           // e.ConfigureConsumer<AuctionCreatedConsumer>(context);
-        });
+        cfg.ConfigureEndpoints(context);
     });
 });
 
-// This service runs MassTransit as a hosted service
-builder.Services.AddMassTransitHostedService();
+//builder.Services.AddMassTransit(x =>
+//{
+//   x.AddConsumer<StartAuctionConsumer>();
 
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        cfg.Host("rabbitmq", h =>
+//        {
+//            h.Username("guest");  
+//            h.Password("guest");  
+//        });
 
-// RabbitMQ setup
-//var factory = new ConnectionFactory() { HostName = configuration["RabbitMq:HostName"] };
-//var connection = factory.CreateConnection();
-//services.AddSingleton(connection);
-//services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
+//        // Configure the receive endpoint and associate it with the consumer
+//        cfg.ReceiveEndpoint("start-auction-queue", e =>
+//        {
+//            e.ConfigureConsumer<StartAuctionConsumer>(context);
+//        });
+//    });
+//});
 
-//// Register the RabbitMQ Event Publisher
-//services.AddSingleton<IEventPublisher>(provider =>
-//    new RabbitMqEventPublisher("localhost", "AuctionEventsQueue"));
-
-
+//// This service runs MassTransit as a hosted service
+//builder.Services.AddMassTransitHostedService();
 
 var app = builder.Build();
 

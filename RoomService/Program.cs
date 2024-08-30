@@ -3,9 +3,6 @@
 using FluentValidation;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RabbitMQ.Client;
 using RoomService.Application.Commands;
 using RoomService.Application.UnitOfWork;
 using RoomService.Infrastructure.Data;
@@ -21,35 +18,32 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreateAuctionRoomCommand>());
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<UpdateAuctionRoomCommand>());
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<DeleteAuctionRoomCommand>());
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAuctionRoomCommand.CommandValidator>();
-//builder.Services.AddValidatorsFromAssemblyContaining<UpdateAuctionRoomCommand.CommandValidator>();
-
-//builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddScoped<IAuctionRoomRepository, AuctionRoomRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddDbContext<AuctionContext>(options =>
-           options.UseSqlServer(builder.Configuration.GetConnectionString("AuctionDb")));
+           options.UseSqlServer(builder.Configuration.GetConnectionString("Auction")));
 
-// Add services to the container.
 builder.Services.AddMassTransit(x =>
 {
-    // No consumers to add here since RoomService is only publishing the event
+    //x.AddConsumersFromNamespaceContaining<NewHighestBidConsumer>();
+
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("bids", false));
+
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq", h =>
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
         {
-            h.Username("guest");  
-            h.Password("guest");  
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
         });
+
+        cfg.ConfigureEndpoints(context);
     });
 });
-
-builder.Services.AddMassTransitHostedService();
 
 
 var app = builder.Build();

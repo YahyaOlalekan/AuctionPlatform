@@ -1,4 +1,6 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using NotificationService.Application.Consumers;
 using NotificationService.Application.UnitOfWork;
 using NotificationService.Infrastructure.Data;
 using NotificationService.Infrastructure.Repositories;
@@ -15,27 +17,55 @@ builder.Services.AddSwaggerGen();
 //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<PlaceBidCommand>());
 
 //builder.Services.AddValidatorsFromAssemblyContaining<PlaceBidCommand.CommandValidator>();
-//builder.Services.AddValidatorsFromAssemblyContaining<UpdateAuctionRoomCommand.CommandValidator>();
-
-//builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-//builder.Services.AddSingleton<BidEventPublisher>();
 
 builder.Services.AddDbContext<NotificationContext>(options =>
            options.UseSqlServer(builder.Configuration.GetConnectionString("Notifications")));
 
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumersFromNamespaceContaining<NewHighestBidConsumer>();
 
-// RabbitMQ setup
-//var factory = new ConnectionFactory() { HostName = configuration["RabbitMq:HostName"] };
-//var connection = factory.CreateConnection();
-//services.AddSingleton(connection);
-//services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("bids", false));
 
-//// Register the RabbitMQ Event Publisher
-//services.AddSingleton<IEventPublisher>(provider =>
-//    new RabbitMqEventPublisher("localhost", "AuctionEventsQueue"));
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+        {
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+
+//builder.Services.AddMassTransit(x =>
+//{
+//    x.AddConsumer<NewHighestBidConsumer>();
+
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        cfg.Host("rabbitmq", h =>
+//        {
+//            h.Username("guest");
+//            h.Password("guest");
+//        });
+
+//        // Configure the receive endpoint and associate it with the consumer
+//        cfg.ReceiveEndpoint("new-highest-bid-queue", e =>
+//        {
+//            e.ConfigureConsumer<NewHighestBidConsumer>(context);
+//        });
+//    });
+//});
+
+// This service runs MassTransit as a hosted service
+//builder.Services.AddMassTransitHostedService();
+
 
 var app = builder.Build();
 
