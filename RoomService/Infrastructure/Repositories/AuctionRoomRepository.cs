@@ -1,4 +1,5 @@
-﻿using RoomService.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using RoomService.Domain.Entities;
 using RoomService.Infrastructure.Data;
 
 namespace RoomService.Infrastructure.Repositories
@@ -37,6 +38,11 @@ namespace RoomService.Infrastructure.Repositories
                 _context.AuctionRooms.Remove(auctionRoom);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<AuctionRoom>> GetAllAsync()
+        {
+            return await _context.AuctionRooms.ToListAsync();
         }
     }
 }

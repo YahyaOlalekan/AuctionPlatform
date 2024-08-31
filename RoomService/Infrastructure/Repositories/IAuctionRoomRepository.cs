@@ -8,6 +8,7 @@ namespace RoomService.Infrastructure.Repositories
         Task AddAsync(AuctionRoom auctionRoom);
         Task UpdateAsync(AuctionRoom auctionRoom);
         Task DeleteAsync(Guid id);
+        Task<IEnumerable<AuctionRoom>> GetAllAsync();
     }
 
 }

@@ -4,11 +4,11 @@ using RoomService.Infrastructure.Repositories;
 
 namespace RoomService.Application.Queries
 {
-    public class GetAuctionRoomByIdQuery
+    public class GetAllAuctionRoomsQuery
     {
-        public record GetAuctionRoomById(Guid Id) : IRequest<AuctionRoom>;
+        public record GetAllAuctionRooms : IRequest<IEnumerable<AuctionRoom>>;
 
-        public class QueryHandler : IRequestHandler<GetAuctionRoomById, AuctionRoom>
+        public class QueryHandler : IRequestHandler<GetAllAuctionRooms, IEnumerable<AuctionRoom>>
         {
             private readonly IAuctionRoomRepository _repository;
 
@@ -17,9 +17,9 @@ namespace RoomService.Application.Queries
                 _repository = repository;
             }
 
-            public async Task<AuctionRoom> Handle(GetAuctionRoomById request, CancellationToken cancellationToken)
+            public async Task<IEnumerable<AuctionRoom>> Handle(GetAllAuctionRooms request, CancellationToken cancellationToken)
             {
-                return await _repository.GetByIdAsync(request.Id);
+                return await _repository.GetAllAsync();
             }
         }
 

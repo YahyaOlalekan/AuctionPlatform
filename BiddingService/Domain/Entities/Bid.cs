@@ -16,6 +16,17 @@
             Amount = amount;
             Timestamp = DateTime.UtcNow;
         }
+
+       
+        public void UpdateAmount(decimal newAmount)
+        {
+            if (newAmount <= Amount)
+            {
+                throw new ArgumentException("The new bid amount must be greater than the current amount.");
+            }
+
+            Amount = newAmount;
+        }
     }
 
 }

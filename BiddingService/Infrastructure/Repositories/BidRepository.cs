@@ -34,6 +34,31 @@ namespace BiddingService.Infrastructure.Repositories
                                  .OrderByDescending(b => b.Timestamp)
                                  .ToListAsync();
         }
-    }
+        public async Task<Bid> GetByIdAsync(Guid id)
+        {
+            return await _context.Bids.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Bid>> GetAllAsync()
+        {
+            return await _context.Bids.ToListAsync();
+        }
+
+       
+        public async Task UpdateAsync(Bid bid)
+        {
+            _context.Bids.Update(bid);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var bid = await GetByIdAsync(id);
+            if (bid != null)
+            {
+                _context.Bids.Remove(bid);
+                await _context.SaveChangesAsync();
+            }
+        }   }
 
 }

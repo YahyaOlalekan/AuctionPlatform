@@ -45,28 +45,7 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-//builder.Services.AddMassTransit(x =>
-//{
-//   x.AddConsumer<StartAuctionConsumer>();
 
-//    x.UsingRabbitMq((context, cfg) =>
-//    {
-//        cfg.Host("rabbitmq", h =>
-//        {
-//            h.Username("guest");  
-//            h.Password("guest");  
-//        });
-
-//        // Configure the receive endpoint and associate it with the consumer
-//        cfg.ReceiveEndpoint("start-auction-queue", e =>
-//        {
-//            e.ConfigureConsumer<StartAuctionConsumer>(context);
-//        });
-//    });
-//});
-
-//// This service runs MassTransit as a hosted service
-//builder.Services.AddMassTransitHostedService();
 
 var app = builder.Build();
 

@@ -14,10 +14,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<PlaceBidCommand>());
-
-//builder.Services.AddValidatorsFromAssemblyContaining<PlaceBidCommand.CommandValidator>();
-
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -42,29 +38,6 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-
-//builder.Services.AddMassTransit(x =>
-//{
-//    x.AddConsumer<NewHighestBidConsumer>();
-
-//    x.UsingRabbitMq((context, cfg) =>
-//    {
-//        cfg.Host("rabbitmq", h =>
-//        {
-//            h.Username("guest");
-//            h.Password("guest");
-//        });
-
-//        // Configure the receive endpoint and associate it with the consumer
-//        cfg.ReceiveEndpoint("new-highest-bid-queue", e =>
-//        {
-//            e.ConfigureConsumer<NewHighestBidConsumer>(context);
-//        });
-//    });
-//});
-
-// This service runs MassTransit as a hosted service
-//builder.Services.AddMassTransitHostedService();
 
 
 var app = builder.Build();

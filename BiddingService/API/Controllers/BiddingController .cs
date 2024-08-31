@@ -42,6 +42,42 @@ namespace BiddingService.API.Controllers
 
             return Ok(bids);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBids()
+        {
+            var bids = await _mediator.Send(new GetAllBidsQuery());
+            return Ok(bids);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBidById(Guid id)
+        {
+            var bid = await _mediator.Send(new GetBidByIdQuery.GetBidById(id));
+            if (bid == null)
+                return NotFound();
+
+            return Ok(bid);
+        }
+
+       
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBid(Guid id, [FromBody] UpdateBidCommand.UpdateBid command)
+        {
+            if (id != command.Id)
+                return BadRequest("ID mismatch");
+
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBid(Guid id)
+        {
+            await _mediator.Send(new DeleteBidCommand.DeleteBid(id));
+            return NoContent();
+        }
     }
 
 }

@@ -23,7 +23,7 @@ namespace RoomService.Infrastructure.Data.Configuration
             builder.Property(ar => ar.IsActive)
                    .IsRequired();
 
-            // If you need to map the _bids collection
+            // If there is need to map the _bids collection
             builder.Ignore(ar => ar.Bids);  // Assuming the bids are managed separately and not directly mapped to the database
 
             builder.ToTable("AuctionRooms");

@@ -17,11 +17,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreateInvoiceCommand>());
 
-//builder.Services.AddValidatorsFromAssemblyContaining<CreateInvoiceCommand.CommandValidator>();
-//builder.Services.AddValidatorsFromAssemblyContaining<UpdateAuctionRoomCommand.CommandValidator>();
-
-//builder.Services.AddFluentValidationAutoValidation();
-
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 //builder.Services.AddSingleton<BidEventPublisher>();
@@ -47,25 +42,7 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-//builder.Services.AddMassTransit(x =>
-//{
-//    //x.AddConsumer<StartAuctionConsumer>();
 
-//    x.UsingRabbitMq((context, cfg) =>
-//    {
-//        cfg.Host("rabbitmq", h =>
-//        {
-//            h.Username("guest");
-//            h.Password("guest");
-//        });
-
-//        // Configure the receive endpoint and associate it with the consumer
-//        cfg.ReceiveEndpoint("start-auction-queue", e =>
-//        {
-//           // e.ConfigureConsumer<StartAuctionConsumer>(context);
-//        });
-//    });
-//});
 
 var app = builder.Build();
 

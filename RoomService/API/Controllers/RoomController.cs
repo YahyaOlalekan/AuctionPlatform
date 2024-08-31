@@ -26,7 +26,7 @@ namespace RoomService.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var room = await _mediator.Send(new GetAuctionRoomByIdQuery.Query(id));
+            var room = await _mediator.Send(new GetAuctionRoomByIdQuery.GetAuctionRoomById(id));
             if (room == null)
                 return NotFound();
             return Ok(room);
@@ -48,6 +48,15 @@ namespace RoomService.API.Controllers
             await _mediator.Send(new DeleteAuctionRoomCommand.DeleteAuctionRoom(id));
             return NoContent();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllAuctionRooms()
+        {
+            var auctionRooms = await _mediator.Send(new GetAllAuctionRoomsQuery.GetAllAuctionRooms());
+            return Ok(auctionRooms);
+        }
+
+        
     }
 
 

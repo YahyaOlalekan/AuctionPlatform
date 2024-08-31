@@ -17,11 +17,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<ProcessPaymentCommand>());
 
-//builder.Services.AddValidatorsFromAssemblyContaining<ProcessPaymentCommand.CommandValidator>();
-//builder.Services.AddValidatorsFromAssemblyContaining<UpdateAuctionRoomCommand.CommandValidator>();
-
-//builder.Services.AddFluentValidationAutoValidation();
-
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 //builder.Services.AddSingleton<BidEventPublisher>();

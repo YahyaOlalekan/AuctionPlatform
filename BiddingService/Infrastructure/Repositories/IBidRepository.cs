@@ -7,6 +7,10 @@ namespace BiddingService.Infrastructure.Repositories
         Task<Bid> GetHighestBidAsync(Guid auctionRoomId);
         Task AddAsync(Bid bid);
         Task<List<Bid>> GetBidsByAuctionRoomAsync(Guid auctionRoomId);
+        Task<Bid> GetByIdAsync(Guid id);
+        Task<IEnumerable<Bid>> GetAllAsync();  
+        Task UpdateAsync(Bid bid);  
+        Task DeleteAsync(Guid id);
     }
 
 }
