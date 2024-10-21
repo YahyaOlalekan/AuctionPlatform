@@ -26,6 +26,8 @@ namespace BiddingService.Application.Commands
 
                 return Unit.Value;
             }
+
+            //testing
         }
 
     }
